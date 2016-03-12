@@ -8,7 +8,7 @@ PLUGINS = [
     'slackbot.plugins',
 ]
 
-# API_TOKEN = '###token###'
+API_TOKEN = None
 
 '''
 If you use Slack Web API to send messages (with send_webapi() or reply_webapi()),
@@ -27,7 +27,8 @@ for key in os.environ:
 try:
     from slackbot_settings import *
 except ImportError:
-    try:
-        from local_settings import *
-    except ImportError:
-        pass
+    pass
+    # try:
+    #     from local_settings import *
+    # except ImportError:
+    #     pass

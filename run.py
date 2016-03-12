@@ -3,7 +3,7 @@
 import sys
 import logging
 import logging.config
-from slackbot import settings
+from slackbot.conf import settings
 from slackbot.bot import Bot
 
 

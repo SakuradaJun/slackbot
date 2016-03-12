@@ -7,7 +7,7 @@ import re
 import time
 from glob import glob
 from six.moves import _thread
-from slackbot import settings
+from slackbot.conf import settings
 from slackbot.manager import PluginsManager
 from slackbot.slackclient import SlackClient
 from slackbot.dispatcher import MessageDispatcher
