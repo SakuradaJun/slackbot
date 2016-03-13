@@ -14,6 +14,7 @@ from slackbot.utils import WorkerPool
 logger = logging.getLogger(__name__)
 
 AT_MESSAGE_MATCHER = re.compile(r'^\<@(\w+)\>:? (.*)$')
+default_reply = None
 
 
 class MessageDispatcher(object):
@@ -99,9 +100,14 @@ class MessageDispatcher(object):
             time.sleep(1)
 
     def _default_reply(self, msg):
-        try:
-            from slackbot_settings import default_reply
-        except ImportError:
+        global default_reply
+        message = Message(self._client, msg)
+
+        if default_reply and callable(default_reply):
+            default_reply(message)
+        elif default_reply:
+            message.reply(default_reply)
+        else:
             default_reply = [
                 u'Bad command "{}", You can ask me one of the following questions:\n'.format(msg['text']),
             ]
@@ -109,9 +115,8 @@ class MessageDispatcher(object):
                               for p, v in six.iteritems(self._plugins.commands['respond_to'])]
             # pylint: disable=redefined-variable-type
             default_reply = u'\n'.join(default_reply)
+            message.reply(default_reply)
 
-        m = Message(self._client, msg)
-        m.reply(default_reply)
 
 def unicode_compact(func):
     """

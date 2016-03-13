@@ -29,5 +29,14 @@ class Settings(object):
             return self._wrapped[name]
         return super(Settings, self).__getattribute__(name)
 
+    def get(self, name, default=None):
+        if name in self:
+            return getattr(self, name)
+        else:
+            return default
+
+    def __contains__(self, k):
+        return k in self._wrapped
+
 
 settings = Settings(changed, defaults)

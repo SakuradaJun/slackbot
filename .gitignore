@@ -10,3 +10,4 @@ slackbot_settings.py
 /dist
 /*.egg-info
 .cache
+.idea
