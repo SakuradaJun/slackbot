@@ -180,6 +180,13 @@ class Message(object):
             text,
             attachments=attachments)
 
+    def send_typing(self):
+        message_json = {
+            'type': 'typing',
+            'channel': self._body['channel']
+        }
+        self._client.send_to_websocket(message_json)
+
     @unicode_compact
     def reply(self, text):
         """
