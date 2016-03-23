@@ -8,6 +8,7 @@ import traceback
 from functools import wraps
 
 import six
+from slackbot.conf import settings
 from slackbot.manager import PluginsManager
 from slackbot.utils import WorkerPool
 
@@ -38,9 +39,12 @@ class MessageDispatcher(object):
                     func(Message(self._client, msg), *args)
                 except:
                     logger.exception('failed to handle message %s with plugin "%s"', text, func.__name__)
-                    reply = u'[{}] I have problem when handling "{}"\n'.format(func.__name__, text)
-                    reply += u'```\n{}\n```'.format(traceback.format_exc())
-                    self._client.rtm_send_message(msg['channel'], reply)
+                    if settings.DEBUG:
+                        reply = u'[{}] I have problem when handling "{}"\n'.format(func.__name__, text)
+                        reply += u'```\n{}\n```'.format(traceback.format_exc())
+                        self._client.rtm_send_message(msg['channel'], reply)
+                    else:
+                        self._client.rtm_send_message(msg['channel'], 'I have problem when handling your request')
 
         if not responded and category == u'respond_to':
             self._default_reply(msg)
