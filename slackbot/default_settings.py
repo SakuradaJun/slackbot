@@ -8,7 +8,6 @@ PLUGINS = [
     'slackbot.plugins',
 ]
 
-API_TOKEN = None
 
 '''
 If you use Slack Web API to send messages (with send_webapi() or reply_webapi()),
