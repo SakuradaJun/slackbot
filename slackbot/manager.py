@@ -12,8 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 class PluginsManager(object):
+    plugins = None
+
     def __init__(self):
-        pass
+        assert self.plugins
+
+    @classmethod
+    def set_plugins(cls, plugins):
+        cls.plugins = plugins
 
     commands = {
         'respond_to': {},
@@ -21,12 +27,7 @@ class PluginsManager(object):
     }
 
     def init_plugins(self):
-        if hasattr(settings, 'PLUGINS'):
-            plugins = settings.PLUGINS
-        else:
-            plugins = 'slackbot.plugins'
-
-        for plugin in plugins:
+        for plugin in self.plugins:
             self._load_plugins(plugin)
 
     def _load_plugins(self, plugin):

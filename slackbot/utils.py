@@ -3,6 +3,8 @@
 import os
 import logging
 import tempfile
+from threading import currentThread
+
 import requests
 from contextlib import contextmanager
 from six.moves import _thread, range, queue
@@ -59,6 +61,27 @@ def create_tmp_file(content=''):
         os.remove(name)
 
 
+DEFAULT_THREAD_NAME = None
+
+
+def set_thread_name(thread_name_prefix, th=None):
+    global DEFAULT_THREAD_NAME
+    th = th or currentThread()
+
+    name = DEFAULT_THREAD_NAME
+    if name:
+        if thread_name_prefix:
+            name = '{}::{}'.format(thread_name_prefix, name)
+        th.name = name
+        th.setName(name=name)
+    return th, name
+
+
+def set_default_thread_name(name):
+    global DEFAULT_THREAD_NAME
+    DEFAULT_THREAD_NAME = name
+
+
 class WorkerPool(object):
     def __init__(self, func, nworker=10):
         self.nworker = nworker
@@ -66,13 +89,14 @@ class WorkerPool(object):
         self.queue = queue.Queue()
 
     def start(self):
-        for __ in range(self.nworker):
-            _thread.start_new_thread(self.do_work, tuple())
+        for n in range(self.nworker):
+            _thread.start_new_thread(self.do_work, (n, ))
 
     def add_task(self, msg):
         self.queue.put(msg)
 
-    def do_work(self):
+    def do_work(self, n):
+        set_thread_name('WorkerPool-%(nworker)d' % dict(nworker=n))
         while True:
             msg = self.queue.get()
             self.func(msg)
