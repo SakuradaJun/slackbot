@@ -15,6 +15,19 @@ from websocket import (
 from slackbot.utils import to_utf8
 
 logger = logging.getLogger(__name__)
+GIVE_UP_AT_ERRORS = []
+
+def get_full_module_path(o):
+    module = o.__class__.__module__
+    if module is None or module == str.__class__.__module__:
+        return o.__class__.__name__
+    return module + '.' + o.__class__.__name__
+
+def set_give_up_rules(rules):
+    global GIVE_UP_AT_ERRORS
+    GIVE_UP_AT_ERRORS = []
+    GIVE_UP_AT_ERRORS.extend(rules)
+    return GIVE_UP_AT_ERRORS
 
 
 class SlackClient(object):
@@ -39,13 +52,19 @@ class SlackClient(object):
         self.parse_slack_login_data(reply)
 
     def reconnect(self):
+        global GIVE_UP_AT_ERRORS
         while True:
             try:
                 self.rtm_connect()
                 logger.warning('reconnected to slack rtm websocket')
                 return
-            except:
+            except Exception, e:
                 logger.exception('failed to reconnect')
+                match = (get_full_module_path(e), e.message)
+                for cls_path, error_message in GIVE_UP_AT_ERRORS:
+                    if match == (cls_path, e.message):
+                        logger.error('Give up at %s(%s)' % match)
+                        raise
                 time.sleep(1)
 
     def parse_slack_login_data(self, login_data):
